@@ -18,7 +18,8 @@ app.get('/reimbursements', (req:Request, res:Response)=>{
 
 app.post('/users', (req:Request, res:Response)=>{
     console.log(req.body);
-    let {userId, 
+    let {
+        userId, 
         username, 
         password, 
         firstName, 
@@ -31,11 +32,36 @@ app.post('/users', (req:Request, res:Response)=>{
             users.push({userId, username, password, firstName, lastName, email, role})
             res.sendStatus(201)
         }else{
-            res.status(400).send("Please Fill Out All Fields")    
+            res.status(400).send('Please Fill Out All Fields')    
         }
 
     // res.sendStatus(501);
 })
+
+app.post('/reimbursements', (req:Request, res:Response)=>{
+    console.log(req.body);
+    let {
+        reimbursementId,
+        author,
+        amount,
+        dateSubmitted,
+        dateResolved,
+        description,
+        resolver,
+        status,
+        type
+    } = req.body
+
+        if(reimbursementId && author && amount && dateSubmitted && dateResolved && description && resolver && status && type){
+            reimbursements.push({reimbursementId, author, amount, dateSubmitted, dateResolved, description, resolver, status, type})
+            res.sendStatus(201)
+        }else{
+            res.status(400).send('Please Fill Out All Fields')
+        }
+    
+})
+
+
 app.listen(2006, () =>{
     console.log('Listening on port 2006');
 })
