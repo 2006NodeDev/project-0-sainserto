@@ -1,4 +1,4 @@
-import express, { Request, Response } from 'express'
+import express, { Request, Response, NextFunction} from 'express'
 import { User } from '../models/User'
 import { UserInputError } from '../errors/UserInputError'
 import { UserIdInputError } from '../errors/UserIdInputError'
@@ -6,11 +6,11 @@ import { UserNotFoundError } from '../errors/UserNotFoundError'
 
 export let userRouter = express.Router()
 
-userRouter.get('/', (req:Request, res:Response)=>{
+userRouter.get('/', (req:Request, res:Response, next:NextFunction)=>{
     res.json(users)
 })
 
-userRouter.post('/', (req:Request, res:Response)=>{
+userRouter.post('/', (req:Request, res:Response, next:NextFunction)=>{
     console.log(req.body);
     let {
         userId, 
@@ -33,22 +33,57 @@ userRouter.post('/', (req:Request, res:Response)=>{
     // res.sendStatus(501);
 })
 
-userRouter.get('/:id', (req:Request, res:Response) => {
+userRouter.get('/:id', (req:Request, res:Response, next:NextFunction) => {
     let {id} = req.params
     //if input is bad
     if(isNaN(+id)){ //if string
         throw new UserIdInputError()
     } else {
+        let found = false;
         for(const user of users){
             if(user.userId == +id){
                 res.json(user)
+                found = true
             }
         }
-        throw new UserNotFoundError()
+        if(!found){
+            throw new UserNotFoundError()
+        }
     }
     //if user doesnt exist
 
 })
+
+// userRouter.patch('/:id', (req:Request, res:Response, next:NextFunction) =>{
+//     let {id} = req.params
+//     //if input is bad
+//     if(isNaN(+id)){ //if string
+//         throw new UserIdInputError()
+//     } else {
+//         let found = false;
+//         for(const user of users){
+//             if(user.userId == +id){
+//                 console.log(req.body);
+//                 let {
+//                     userId, 
+//                     username, 
+//                     password, 
+//                     firstName, 
+//                     lastName, 
+//                     email, 
+//                     role    
+//                 } = req.body
+//                 users.push({userId, username, password, firstName, lastName, email, role})
+                
+//                 res.json(user)
+//                 found = true
+//             }
+//         }
+//         if(!found){
+//         throw new UserNotFoundError()
+//         }
+//     }
+// })
 
 let users:User[] = [
     {

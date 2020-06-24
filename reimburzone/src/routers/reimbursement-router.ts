@@ -1,10 +1,33 @@
-import express, { Request, Response } from 'express'
+import express, { Request, Response, NextFunction } from 'express'
 import { Reimbursement } from '../models/Reimbursement'
+import { UserIdInputError } from '../errors/UserIdInputError'
+import { UserNotFoundError } from '../errors/UserNotFoundError'
 
 export let reimbursementRouter = express.Router()
 
 reimbursementRouter.get('/', (req:Request, res:Response)=>{
     res.json(reimbursements)
+})
+
+reimbursementRouter.get('/author/userId/:id', (req:Request, res:Response, next:NextFunction) => {
+    let {id} = req.params
+    //if input is bad
+    if(isNaN(+id)){ //if string
+        throw new UserIdInputError()
+    } else {
+        let found = false;
+        for(const reimbursement of reimbursements){
+            if(reimbursement.author === +id){
+                res.json(reimbursement)
+                found = true
+            }
+        }
+        if(!found){
+            throw new UserNotFoundError()
+        }
+    }
+    //if user doesnt exist
+
 })
 
 reimbursementRouter.post('/', (req:Request, res:Response)=>{
