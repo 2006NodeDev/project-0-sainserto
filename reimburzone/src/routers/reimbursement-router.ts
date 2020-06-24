@@ -2,6 +2,8 @@ import express, { Request, Response, NextFunction } from 'express'
 import { Reimbursement } from '../models/Reimbursement'
 import { UserIdInputError } from '../errors/UserIdInputError'
 import { UserNotFoundError } from '../errors/UserNotFoundError'
+import { StatusIdInputError } from '../errors/StatusIdInputError'
+import { ReimbursementNotFoundError } from '../errors/ReimbursementNotFoundError'
 
 export let reimbursementRouter = express.Router()
 
@@ -24,6 +26,27 @@ reimbursementRouter.get('/author/userId/:id', (req:Request, res:Response, next:N
         }
         if(!found){
             throw new UserNotFoundError()
+        }
+    }
+    //if user doesnt exist
+
+})
+
+reimbursementRouter.get('/status/:statusId', (req:Request, res:Response, next:NextFunction) => {
+    let {statusId} = req.params
+    //if input is bad
+    if(isNaN(+statusId)){ //if string
+        throw new StatusIdInputError()
+    } else {
+        let found = false;
+        for(const reimbursement of reimbursements){
+            if(reimbursement.status.statusId === +statusId){
+                res.json(reimbursement)
+                found = true
+            }
+        }
+        if(!found){
+            throw new ReimbursementNotFoundError()
         }
     }
     //if user doesnt exist
@@ -63,11 +86,11 @@ let reimbursements:Reimbursement[] = [
         description:'housing',
         resolver:2,
         status:{
-            statusId:2,
+            statusId:3,
             status:'denied'
         },
         type:{
-            typeId:2,
+            typeId:1,
             type:'lodging'
         }
     },
@@ -77,15 +100,15 @@ let reimbursements:Reimbursement[] = [
         author:4,
         dateSubmitted:2019,
         dateResolved:2020,
-        description:'for book',
+        description:'went to japan',
         resolver:2,
         status:{
-            statusId:3,
+            statusId:2,
             status:'approved'
         },
         type:{
             typeId:2,
-            type:'book'
+            type:'travel'
         }
     }
 ]
