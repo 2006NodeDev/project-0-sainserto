@@ -41,14 +41,32 @@ let reimbursements:Reimbursement[] = [
         resolver:2,
         status:{
             statusId:2,
-            status:'resolved'
+            status:'denied'
         },
         type:{
             typeId:2,
-            type:'cash'
+            type:'lodging'
+        }
+    },
+    {
+        reimbursementId:2,
+        amount:444,
+        author:4,
+        dateSubmitted:2019,
+        dateResolved:2020,
+        description:'for book',
+        resolver:2,
+        status:{
+            statusId:3,
+            status:'approved'
+        },
+        type:{
+            typeId:2,
+            type:'book'
         }
     }
 ]
+
 // reimbursementId: number
 //     author: number
 //     amount: number

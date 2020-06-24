@@ -1,13 +1,16 @@
 import express, { Request, Response } from 'express'
 import { User } from '../models/User'
+import { UserInputError } from '../errors/UserInputError'
+import { UserIdInputError } from '../errors/UserIdInputError'
+import { UserNotFoundError } from '../errors/UserNotFoundError'
 
 export let userRouter = express.Router()
 
-userRouter.get('/users', (req:Request, res:Response)=>{
+userRouter.get('/', (req:Request, res:Response)=>{
     res.json(users)
 })
 
-userRouter.post('/users', (req:Request, res:Response)=>{
+userRouter.post('/', (req:Request, res:Response)=>{
     console.log(req.body);
     let {
         userId, 
@@ -23,10 +26,28 @@ userRouter.post('/users', (req:Request, res:Response)=>{
             users.push({userId, username, password, firstName, lastName, email, role})
             res.sendStatus(201)
         }else{
-            res.status(400).send('Please Fill Out All Fields')    
+            throw new UserInputError()
+            // res.status(400).send('Please Fill Out All Fields')    
         }
 
     // res.sendStatus(501);
+})
+
+userRouter.get('/:id', (req:Request, res:Response) => {
+    let {id} = req.params
+    //if input is bad
+    if(isNaN(+id)){ //if string
+        throw new UserIdInputError()
+    } else {
+        for(const user of users){
+            if(user.userId == +id){
+                res.json(user)
+            }
+        }
+        throw new UserNotFoundError()
+    }
+    //if user doesnt exist
+
 })
 
 let users:User[] = [
@@ -63,7 +84,7 @@ let users:User[] = [
         email:'kyeo@gmail.com',
         role:{
             roleId:3,
-            role:'member'
+            role:'user'
         }
     }
 ]
