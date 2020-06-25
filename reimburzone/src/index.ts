@@ -1,6 +1,10 @@
-import express from 'express'
+import express, { Request, Response } from 'express'
 import { reimbursementRouter } from './routers/reimbursement-router'
-import { userRouter } from './routers/user-router'
+import { userRouter, users } from './routers/user-router'
+import { loggingMiddleware } from './middleware/logging-middleware'
+import { sessionMiddleware } from './middleware/session-middleware'
+import { BadCredentialsError } from './errors/BadCredentialsError'
+import { AuthFailureError } from './errors/AuthFailureError'
 // import { HttpError } from './errors/HttpErrors'
 
 const app = express()
@@ -10,9 +14,33 @@ const app = express()
 // })
 app.use(express.json())
 
+//middleware
+app.use(loggingMiddleware)
+app.use(sessionMiddleware)
+
 app.use('/reimbursements', reimbursementRouter)
 
 app.use('/users', userRouter)
+
+app.post('/login', (req:Request, res:Response) => {
+    let username = req.body.username
+    let password = req.body.password
+    if(!username && !password){
+        throw new BadCredentialsError()
+    } else {
+        let found = false
+        for(const user of users) {
+            if(user.username === username && user.password === password){
+                req.session.user = user
+                res.json(user)
+                found = true
+            }
+        }
+        if(!found){
+            throw new AuthFailureError()
+        }
+    }
+})
 
 app.use((err,req,res,next) => { 
     if(err.statusCode){

@@ -73,7 +73,6 @@ reimbursementRouter.post('/', (req:Request, res:Response)=>{
         }else{
             res.status(400).send('Please Fill Out All Fields')
         }
-    
 })
 
 let reimbursements:Reimbursement[] = [

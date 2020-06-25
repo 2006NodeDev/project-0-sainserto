@@ -50,8 +50,6 @@ userRouter.get('/:id', (req:Request, res:Response, next:NextFunction) => {
             throw new UserNotFoundError()
         }
     }
-    //if user doesnt exist
-
 })
 
 // userRouter.patch('/:id', (req:Request, res:Response, next:NextFunction) =>{
@@ -64,8 +62,13 @@ userRouter.get('/:id', (req:Request, res:Response, next:NextFunction) => {
 //         for(const user of users){
 //             if(user.userId == +id){
 //                 console.log(req.body);
+//                 // Comment.update({ comment: req.body.comment }, { where: { id: req.params.id } })
+//                 // .then((result) => {
+//                 //   res.json(result);
+//                 // })
+      
 //                 let {
-//                     userId, 
+//                     userId = +id, 
 //                     username, 
 //                     password, 
 //                     firstName, 
@@ -85,7 +88,7 @@ userRouter.get('/:id', (req:Request, res:Response, next:NextFunction) => {
 //     }
 // })
 
-let users:User[] = [
+export let users:User[] = [
     {
         userId:1,
         username:'sainserto',
