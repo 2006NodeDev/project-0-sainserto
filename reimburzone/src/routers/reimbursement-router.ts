@@ -1,9 +1,10 @@
-import express, { Request, Response, NextFunction } from 'express'
+import express, { Request, Response, NextFunction} from 'express'
 import { Reimbursement } from '../models/Reimbursement'
 import { UserIdInputError } from '../errors/UserIdInputError'
 import { UserNotFoundError } from '../errors/UserNotFoundError'
 import { StatusIdInputError } from '../errors/StatusIdInputError'
 import { ReimbursementNotFoundError } from '../errors/ReimbursementNotFoundError'
+import { authorizationMiddleware } from '../middleware/authorization-middleware'
 
 export let reimbursementRouter = express.Router()
 
@@ -11,7 +12,9 @@ reimbursementRouter.get('/', (req:Request, res:Response)=>{
     res.json(reimbursements)
 })
 
-reimbursementRouter.get('/author/userId/:id', (req:Request, res:Response, next:NextFunction) => {
+//add logged-in user authorization !!!!!! if they input their own user id. but if it's not theirs, then unauthorized.
+
+reimbursementRouter.get('/author/userId/:id', authorizationMiddleware(['admin','finance-manager']), (req:Request, res:Response, next:NextFunction) => {
     let {id} = req.params
     //if input is bad
     if(isNaN(+id)){ //if string
@@ -32,7 +35,7 @@ reimbursementRouter.get('/author/userId/:id', (req:Request, res:Response, next:N
 
 })
 
-reimbursementRouter.get('/status/:statusId', (req:Request, res:Response, next:NextFunction) => {
+reimbursementRouter.get('/status/:statusId', authorizationMiddleware(['admin','finance-manager']), (req:Request, res:Response, next:NextFunction) => {
     let {statusId} = req.params
     //if input is bad
     if(isNaN(+statusId)){ //if string
@@ -53,7 +56,7 @@ reimbursementRouter.get('/status/:statusId', (req:Request, res:Response, next:Ne
 
 })
 
-reimbursementRouter.post('/', (req:Request, res:Response)=>{
+reimbursementRouter.post('/', authorizationMiddleware(['admin','finance-manager','user']), (req:Request, res:Response)=>{
     console.log(req.body);
     let {
         reimbursementId,
@@ -74,6 +77,10 @@ reimbursementRouter.post('/', (req:Request, res:Response)=>{
             res.status(400).send('Please Fill Out All Fields')
         }
 })
+
+// reimbursementRouter.patch('/:id',authorizationMiddleware(['admin','finance-manager']), (req:Request, res:Response, next:NextFunction)=>{
+
+// })
 
 let reimbursements:Reimbursement[] = [
     {

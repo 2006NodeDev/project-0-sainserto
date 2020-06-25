@@ -3,10 +3,13 @@ import { User } from '../models/User'
 import { UserInputError } from '../errors/UserInputError'
 import { UserIdInputError } from '../errors/UserIdInputError'
 import { UserNotFoundError } from '../errors/UserNotFoundError'
+import { authenticationMiddleware } from '../middleware/authentication-middleware'
+import { authorizationMiddleware } from '../middleware/authorization-middleware'
 
 export let userRouter = express.Router()
+userRouter.use(authenticationMiddleware)
 
-userRouter.get('/', (req:Request, res:Response, next:NextFunction)=>{
+userRouter.get('/', authorizationMiddleware(['admin','finance-manager']), (req:Request, res:Response, next:NextFunction)=>{
     res.json(users)
 })
 
@@ -33,7 +36,7 @@ userRouter.post('/', (req:Request, res:Response, next:NextFunction)=>{
     // res.sendStatus(501);
 })
 
-userRouter.get('/:id', (req:Request, res:Response, next:NextFunction) => {
+userRouter.get('/:id', authorizationMiddleware(['admin','finance-manager']), (req:Request, res:Response, next:NextFunction) => {
     let {id} = req.params
     //if input is bad
     if(isNaN(+id)){ //if string
@@ -52,7 +55,7 @@ userRouter.get('/:id', (req:Request, res:Response, next:NextFunction) => {
     }
 })
 
-// userRouter.patch('/:id', (req:Request, res:Response, next:NextFunction) =>{
+// userRouter.patch('/:id', authorizationMiddleware(['admin']), (req:Request, res:Response, next:NextFunction) =>{
 //     let {id} = req.params
 //     //if input is bad
 //     if(isNaN(+id)){ //if string
