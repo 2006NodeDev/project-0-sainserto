@@ -5,9 +5,11 @@ import { UserNotFoundError } from '../errors/UserNotFoundError'
 import { StatusIdInputError } from '../errors/StatusIdInputError'
 import { ReimbursementNotFoundError } from '../errors/ReimbursementNotFoundError'
 import { authorizationMiddleware } from '../middleware/authorization-middleware'
-import { getAllReimbursements } from '../daos/reimbursement-dao'
+import { getAllReimbursements, findReimbursementByUserId, findReimbursementByStatusId } from '../daos/reimbursement-dao'
 
 export let reimbursementRouter = express.Router()
+
+//get all reimbursements -admin only
 
 reimbursementRouter.get('/', async (req:Request, res:Response, next:NextFunction)=>{
     // res.json(reimbursements)
@@ -21,47 +23,10 @@ reimbursementRouter.get('/', async (req:Request, res:Response, next:NextFunction
 
 //add logged-in user authorization !!!!!! if they input their own user id. but if it's not theirs, then unauthorized.
 
-reimbursementRouter.get('/author/userId/:id', authorizationMiddleware(['admin','finance-manager']), (req:Request, res:Response, next:NextFunction) => {
-    let {id} = req.params
-    //if input is bad
-    if(isNaN(+id)){ //if string
-        throw new UserIdInputError()
-    } else {
-        let found = false;
-        for(const reimbursement of reimbursements){
-            if(reimbursement.author === +id){
-                res.json(reimbursement)
-                found = true
-            }
-        }
-        if(!found){
-            throw new UserNotFoundError()
-        }
-    }
-    //if user doesnt exist
 
-})
 
-reimbursementRouter.get('/status/:statusId', authorizationMiddleware(['admin','finance-manager']), (req:Request, res:Response, next:NextFunction) => {
-    let {statusId} = req.params
-    //if input is bad
-    if(isNaN(+statusId)){ //if string
-        throw new StatusIdInputError()
-    } else {
-        let found = false;
-        for(const reimbursement of reimbursements){
-            if(reimbursement.status.statusId === +statusId){
-                res.json(reimbursement)
-                found = true
-            }
-        }
-        if(!found){
-            throw new ReimbursementNotFoundError()
-        }
-    }
-    //if user doesnt exist
 
-})
+
 
 reimbursementRouter.post('/', authorizationMiddleware(['admin','finance-manager','user']), (req:Request, res:Response)=>{
     console.log(req.body);
@@ -135,3 +100,71 @@ let reimbursements:Reimbursement[] = [
 //     resolver: number
 //     status: ReimbursementStatus
 //     type: ReimbursementType
+
+//get reimbursement by user ... so all the reimbursements made by that user will show up
+//order by date
+//admin, fm, or if userId = user
+
+//, authorizationMiddleware(['admin','finance-manager'])
+
+reimbursementRouter.get('/author/userId/:id', async (req:Request, res:Response, next:NextFunction) => {
+    let {id} = req.params
+    //if input is bad
+    if(isNaN(+id)){ //if string
+        throw new UserIdInputError()
+    } else {
+        try {
+            let reimbursement = await findReimbursementByUserId(+id)
+            res.json(reimbursement)
+            // found = true
+        } catch (e) {
+            next(new UserNotFoundError())
+        }
+        // let found = false;
+        // for(const reimbursement of reimbursements){
+        //     if(reimbursement.author === +id){
+        //         res.json(reimbursement)
+        //         found = true
+        //     }
+        // }
+        // if(!found){
+        //     throw new UserNotFoundError()
+        // }
+    }
+    //if user doesnt exist
+
+})
+
+// get reimbursement by status... so all pending or all denied or all approved
+//order by date
+//admin and fm only
+//, authorizationMiddleware(['admin','finance-manager'])
+
+reimbursementRouter.get('/status/:statusId', async (req:Request, res:Response, next:NextFunction) => {
+    let {statusId} = req.params
+    //if input is bad
+    if(isNaN(+statusId)){ //if string
+        throw new StatusIdInputError()
+    } else {
+
+        try {
+            let reimbursement = await findReimbursementByStatusId(+statusId)
+            res.json(reimbursement)
+            // found = true
+        } catch (e) {
+            next(new ReimbursementNotFoundError())
+        }
+    }
+    //if user doesnt exist
+
+})
+
+
+//submit reimbursement
+//everyone has access but 
+//user should only submit reimbursementId, author, amount, datesubmitted, description, type
+//fm and admin can edit and add dateresolved, resolver and status.
+
+
+//update reimbursement
+//admin and fm
