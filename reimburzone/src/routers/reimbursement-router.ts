@@ -5,11 +5,18 @@ import { UserNotFoundError } from '../errors/UserNotFoundError'
 import { StatusIdInputError } from '../errors/StatusIdInputError'
 import { ReimbursementNotFoundError } from '../errors/ReimbursementNotFoundError'
 import { authorizationMiddleware } from '../middleware/authorization-middleware'
+import { getAllReimbursements } from '../daos/reimbursement-dao'
 
 export let reimbursementRouter = express.Router()
 
-reimbursementRouter.get('/', (req:Request, res:Response)=>{
-    res.json(reimbursements)
+reimbursementRouter.get('/', async (req:Request, res:Response, next:NextFunction)=>{
+    // res.json(reimbursements)
+    try{
+        let reimbursements = await getAllReimbursements()
+        res.json(reimbursements)
+    } catch (e) {
+        next(e)
+    }
 })
 
 //add logged-in user authorization !!!!!! if they input their own user id. but if it's not theirs, then unauthorized.
