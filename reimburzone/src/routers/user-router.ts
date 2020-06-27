@@ -6,7 +6,7 @@ import { UserIdInputError } from '../errors/UserIdInputError'
 import { authenticationMiddleware } from '../middleware/authentication-middleware'
 import { authorizationMiddleware } from '../middleware/authorization-middleware'
 // import { getAllReimbursements } from '../daos/reimbursement-dao'
-import { getAllUsers, findUserById } from '../daos/user-dao'
+import { getAllUsers, findUserById, saveOneUser } from '../daos/user-dao'
 import { UserNotFoundError } from '../errors/UserNotFoundError'
 
 export let userRouter = express.Router()
@@ -34,32 +34,55 @@ userRouter.get('/:id', authorizationMiddleware(['admin', 'finance-manager']), as
             res.json(user)
             // found = true
         } catch (e) {
-            next(new UserNotFoundError())          
+            next(new UserNotFoundError())
         }
     }
 })
 
-userRouter.post('/', (req: Request, res: Response, next: NextFunction) => {
-    console.log(req.body);
-    let {
-        userId,
-        username,
-        password,
-        firstName,
-        lastName,
-        email,
-        role
-    } = req.body
+//admin only!!!!! 
 
-    if (userId && username && password && firstName && lastName && email && role) {
-        users.push({ userId, username, password, firstName, lastName, email, role })
-        res.sendStatus(201)
+userRouter.post('/', async (req: Request, res: Response, next: NextFunction) => {
+
+    let { username, password, firstName, lastName, email, role } = req.body
+    if (!username || !password || !firstName || !lastName || !email || !role) {
+        next(new UserInputError)
     } else {
-        throw new UserInputError()
-        // res.status(400).send('Please Fill Out All Fields')    
+        let newUser: User = {
+            username,
+            password,
+            firstName,
+            lastName,
+            email,
+            role,
+            userId: 0,
+        }
+
+        try {
+            let savedUser = await saveOneUser(newUser)
+            res.json(savedUser)
+        } catch (e) {
+            next(e)
+        }
     }
 
-    // res.sendStatus(501);
+
+    // console.log(req.body);
+    // let {
+    //     userId,
+    //     username,
+    //     password,
+    //     firstName,
+    //     lastName,
+    //     email,
+    //     role
+    // } = req.body
+
+    // if (userId && username && password && firstName && lastName && email && role) {
+    //     users.push({ userId, username, password, firstName, lastName, email, role })
+    //     res.sendStatus(201)
+    // } else {
+    //     throw new UserInputError()
+    // }
 })
 
 
