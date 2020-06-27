@@ -2,11 +2,12 @@ import express, { Request, Response, NextFunction } from 'express'
 import { User } from '../models/User'
 import { UserInputError } from '../errors/UserInputError'
 import { UserIdInputError } from '../errors/UserIdInputError'
-import { UserNotFoundError } from '../errors/UserNotFoundError'
+// import { UserNotFoundError } from '../errors/UserNotFoundError'
 import { authenticationMiddleware } from '../middleware/authentication-middleware'
 import { authorizationMiddleware } from '../middleware/authorization-middleware'
 // import { getAllReimbursements } from '../daos/reimbursement-dao'
-import { getAllUsers } from '../daos/user-dao'
+import { getAllUsers, findUserById } from '../daos/user-dao'
+import { UserNotFoundError } from '../errors/UserNotFoundError'
 
 export let userRouter = express.Router()
 userRouter.use(authenticationMiddleware)
@@ -22,21 +23,18 @@ userRouter.get('/', authorizationMiddleware(['admin', 'finance-manager']), async
 })
 
 //get User by id -- admin, fm, current user if theyre looking for themselves
-userRouter.get('/:id', authorizationMiddleware(['admin', 'finance-manager']), (req: Request, res: Response, next: NextFunction) => {
+userRouter.get('/:id', authorizationMiddleware(['admin', 'finance-manager']), async (req: Request, res: Response, next: NextFunction) => {
     let { id } = req.params
     //if input is bad
     if (isNaN(+id)) { //if string
-        throw new UserIdInputError()
+        next(new UserIdInputError())
     } else {
-        let found = false;
-        for (const user of users) {
-            if (user.userId == +id) {
-                res.json(user)
-                found = true
-            }
-        }
-        if (!found) {
-            throw new UserNotFoundError()
+        try {
+            let user = await findUserById(+id)
+            res.json(user)
+            // found = true
+        } catch (e) {
+            next(new UserNotFoundError())          
         }
     }
 })
