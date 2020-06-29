@@ -36,17 +36,6 @@ app.post('/login', async(req:Request, res:Response, next:NextFunction) => {
         }catch(e){
             next(e)
         }
-        // let found = false
-        // for(const user of users) {
-        //     if(user.username === username && user.password === password){
-        //         req.session.user = user
-        //         res.json(user)
-        //         found = true
-        //     }
-        // }
-        // if(!found){
-        //     throw new AuthFailureError()
-        // }
     }
 })
 

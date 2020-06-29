@@ -66,6 +66,7 @@ userRouter.post('/', async (req: Request, res: Response, next: NextFunction) => 
     }
 
 
+
     // console.log(req.body);
     // let {
     //     userId,
@@ -87,45 +88,63 @@ userRouter.post('/', async (req: Request, res: Response, next: NextFunction) => 
 
 
 
-// userRouter.patch('/:id', authorizationMiddleware(['admin']), (req:Request, res:Response, next:NextFunction) =>{
-//     
+// userRouter.patch('/:id', authorizationMiddleware(['admin']), async (req:Request, res:Response, next:NextFunction) =>{
+    
+//     let { username, password, firstName, lastName, email, role } = req.body
+//         let newUser: User = {
+//             username,
+//             password,
+//             firstName,
+//             lastName,
+//             email,
+//             role,
+//             userId: 0,
+//         }
+
+//         try {
+//             let savedUser = await saveOneUser(newUser)
+//             res.json(savedUser)
+//         } catch (e) {
+//             next(e)
+//         }
+    
 // })
 
-export let users: User[] = [
-    {
-        userId: 1,
-        username: 'sainserto',
-        password: 'password',
-        firstName: 'Arlette',
-        lastName: 'Inserto',
-        email: 'sai@gmail.com',
-        role: {
-            roleId: 1,
-            role: 'admin'
-        }
-    },
-    {
-        userId: 2,
-        username: 'bryle',
-        password: 'password',
-        firstName: 'Bryle',
-        lastName: 'Peralta',
-        email: 'bryle@gmail.com',
-        role: {
-            roleId: 2,
-            role: 'finance-manager'
-        }
-    },
-    {
-        userId: 3,
-        username: 'kyeoleo',
-        password: 'password',
-        firstName: 'Kyeo',
-        lastName: 'Leo',
-        email: 'kyeo@gmail.com',
-        role: {
-            roleId: 3,
-            role: 'user'
-        }
-    }
-]
+// export let users: User[] = [
+    //     {
+    //         userId: 1,
+    //         username: 'sainserto',
+    //         password: 'password',
+    //         firstName: 'Arlette',
+    //         lastName: 'Inserto',
+    //         email: 'sai@gmail.com',
+    //         role: {
+    //             roleId: 1,
+    //             role: 'admin'
+    //         }
+    //     },
+    //     {
+    //         userId: 2,
+    //         username: 'bryle',
+    //         password: 'password',
+    //         firstName: 'Bryle',
+    //         lastName: 'Peralta',
+    //         email: 'bryle@gmail.com',
+    //         role: {
+    //             roleId: 2,
+    //             role: 'finance-manager'
+    //         }
+    //     },
+    //     {
+    //         userId: 3,
+    //         username: 'kyeoleo',
+    //         password: 'password',
+    //         firstName: 'Kyeo',
+    //         lastName: 'Leo',
+    //         email: 'kyeo@gmail.com',
+    //         role: {
+    //             roleId: 3,
+    //             role: 'user'
+    //         }
+    //     }
+    // ]

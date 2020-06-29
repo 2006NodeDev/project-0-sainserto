@@ -1,6 +1,6 @@
 //get all users - admin, fm
 
-import { PoolClient, QueryResult } from "pg";
+import { PoolClient, QueryResult} from "pg";
 import { connectionPool } from ".";
 import { UserNotFoundError } from "../errors/UserNotFoundError";
 import { UserDTOtoUserConverter } from "../utils/UserDTO-to-User-converter";
@@ -87,6 +87,7 @@ export async function saveOneUser(newUser: User): Promise<User> {
 
     try {
         client = await connectionPool.connect()
+        await client.query('BEGIN;')
         let roleId = await client.query(`select r."role_id" from reimburzonedata.roles r 
                                         where r."role" = $1`, [newUser.role])
         if (roleId.rowCount === 0) {
@@ -94,6 +95,7 @@ export async function saveOneUser(newUser: User): Promise<User> {
         }
 
         roleId = roleId.rows[0].role_id
+        
         let results = await client.query(`insert into reimburzonedata.users ("username",
         "password", "first_name", "last_name", "email", "role") 
         values($1,$2,$3,$4,$5,$6) returning "user_id"`,
@@ -116,3 +118,31 @@ export async function saveOneUser(newUser: User): Promise<User> {
 }
 
 
+// export async function updateUser(newUser: User): Promise<User> {
+//     let client: PoolClient
+
+//     try {
+//         client = await connectionPool.connect()
+//         let results = await client.query(`update reimburzonedata.users u set "username" = $1, "password" = $2, 
+//         "first_name" = $3, "last_name" = $4, "email" =$5, "role" = $6 where "user_id" = $7`,
+//             [
+//                 newUser.username,
+//                 newUser.password,
+//                 newUser.firstName,
+//                 newUser.lastName,
+//                 newUser.email,
+//                 newUser.role,
+//                 newUser.userId])
+
+//         let deleteUser = await client.query(``)
+
+//         for (const role of newUSer.roles) {
+//             let updatedUSer = await client.query(``)
+//         }
+
+//     } catch (e) {
+
+//     } finally {
+//         client && client.release()
+//     }
+// }
