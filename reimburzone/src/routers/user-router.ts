@@ -1,10 +1,9 @@
 import express, { Request, Response, NextFunction } from 'express'
 import { User } from '../models/User'
-import { UserInputError } from '../errors/UserInputError'
 import { UserIdInputError } from '../errors/UserIdInputError'
 import { authenticationMiddleware } from '../middleware/authentication-middleware'
 import { authorizationMiddleware } from '../middleware/authorization-middleware'
-import { getAllUsers, findUserById, saveOneUser, updateUser } from '../daos/user-dao'
+import { getAllUsers, findUserById, updateUser } from '../daos/user-dao'
 import { UserNotFoundError } from '../errors/UserNotFoundError'
 
 export let userRouter = express.Router()
@@ -46,34 +45,7 @@ userRouter.get('/:id', authorizationMiddleware(['admin', 'finance-manager', 'use
     }
 })
 
-//admin only!!!!! 
-userRouter.post('/', authorizationMiddleware(['admin']), async (req: Request, res: Response, next: NextFunction) => {
-
-    let { username, password, firstName, lastName, email, role } = req.body
-    if (!username || !password || !firstName || !lastName || !email || !role) {
-        next(new UserInputError)
-    } else {
-        let newUser: User = {
-            username,
-            password,
-            firstName,
-            lastName,
-            email,
-            role,
-            userId: 0
-        }
-
-        try {
-            let savedUser = await saveOneUser(newUser)
-            res.sendStatus(201).json(savedUser)
-        } catch (e) {
-            next(new UserInputError)
-        }
-    }
-})
-
-
-
+//admin only
 userRouter.patch('/', authorizationMiddleware(['admin']), async (req: Request, res: Response, next: NextFunction) => {
 
     let { username, password, firstName, lastName, email, role } = req.body
