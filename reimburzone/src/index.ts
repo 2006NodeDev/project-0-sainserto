@@ -4,23 +4,14 @@ import { userRouter} from './routers/user-router'
 import { loggingMiddleware } from './middleware/logging-middleware'
 import { sessionMiddleware } from './middleware/session-middleware'
 import { BadCredentialsError } from './errors/BadCredentialsError'
-// import { AuthFailureError } from './errors/AuthFailureError'
 import { getUserByUsernameAndPassword } from './daos/user-dao'
-// import { HttpError } from './errors/HttpErrors'
 
 const app = express()
-
-// app.use('/', (req, res) => {
-//     res.send('Hello World')
-// })
 app.use(express.json())
-
-//middleware
 app.use(loggingMiddleware)
 app.use(sessionMiddleware)
 
 app.use('/reimbursements', reimbursementRouter)
-
 app.use('/users', userRouter)
 
 app.post('/login', async(req:Request, res:Response, next:NextFunction) => {

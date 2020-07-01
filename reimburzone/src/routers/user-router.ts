@@ -2,11 +2,9 @@ import express, { Request, Response, NextFunction } from 'express'
 import { User } from '../models/User'
 import { UserInputError } from '../errors/UserInputError'
 import { UserIdInputError } from '../errors/UserIdInputError'
-// import { UserNotFoundError } from '../errors/UserNotFoundError'
 import { authenticationMiddleware } from '../middleware/authentication-middleware'
 import { authorizationMiddleware } from '../middleware/authorization-middleware'
-// import { getAllReimbursements } from '../daos/reimbursement-dao'
-import { getAllUsers, findUserById, saveOneUser } from '../daos/user-dao'
+import { getAllUsers, findUserById, saveOneUser, updateUser } from '../daos/user-dao'
 import { UserNotFoundError } from '../errors/UserNotFoundError'
 
 export let userRouter = express.Router()
@@ -23,25 +21,33 @@ userRouter.get('/', authorizationMiddleware(['admin', 'finance-manager']), async
 })
 
 //get User by id -- admin, fm, current user if theyre looking for themselves
-userRouter.get('/:id', authorizationMiddleware(['admin', 'finance-manager']), async (req: Request, res: Response, next: NextFunction) => {
+userRouter.get('/:id', authorizationMiddleware(['admin', 'finance-manager', 'user']), async (req: Request, res: Response, next: NextFunction) => {
     let { id } = req.params
-    //if input is bad
-    if (isNaN(+id)) { //if string
+    if (isNaN(+id)) {
         next(new UserIdInputError())
-    } else {
+    } else if (req.session.user.role.role === 'finance-manager' || req.session.user.role.role === 'admin') {
         try {
             let user = await findUserById(+id)
             res.json(user)
-            // found = true
         } catch (e) {
             next(new UserNotFoundError())
+        }
+    } else if (req.session.user.role.role === 'user') {
+        try {
+            let user = await findUserById(+id)
+            if (req.session.user.userId === user.userId) {
+                res.json(user)
+            } else {
+                res.status(401).send('The incoming token has expired')
+            }
+        } catch (e) {
+            next(new UserNotFoundError)
         }
     }
 })
 
 //admin only!!!!! 
-
-userRouter.post('/', async (req: Request, res: Response, next: NextFunction) => {
+userRouter.post('/', authorizationMiddleware(['admin']), async (req: Request, res: Response, next: NextFunction) => {
 
     let { username, password, firstName, lastName, email, role } = req.body
     if (!username || !password || !firstName || !lastName || !email || !role) {
@@ -54,97 +60,41 @@ userRouter.post('/', async (req: Request, res: Response, next: NextFunction) => 
             lastName,
             email,
             role,
-            userId: 0,
+            userId: 0
         }
 
         try {
             let savedUser = await saveOneUser(newUser)
-            res.json(savedUser)
+            res.sendStatus(201).json(savedUser)
         } catch (e) {
-            next(e)
+            next(new UserInputError)
         }
     }
-
-
-
-    // console.log(req.body);
-    // let {
-    //     userId,
-    //     username,
-    //     password,
-    //     firstName,
-    //     lastName,
-    //     email,
-    //     role
-    // } = req.body
-
-    // if (userId && username && password && firstName && lastName && email && role) {
-    //     users.push({ userId, username, password, firstName, lastName, email, role })
-    //     res.sendStatus(201)
-    // } else {
-    //     throw new UserInputError()
-    // }
 })
 
 
 
-// userRouter.patch('/:id', authorizationMiddleware(['admin']), async (req:Request, res:Response, next:NextFunction) =>{
-    
-//     let { username, password, firstName, lastName, email, role } = req.body
-//         let newUser: User = {
-//             username,
-//             password,
-//             firstName,
-//             lastName,
-//             email,
-//             role,
-//             userId: 0,
-//         }
+userRouter.patch('/', authorizationMiddleware(['admin']), async (req: Request, res: Response, next: NextFunction) => {
 
-//         try {
-//             let savedUser = await saveOneUser(newUser)
-//             res.json(savedUser)
-//         } catch (e) {
-//             next(e)
-//         }
-    
-// })
-
-// export let users: User[] = [
-    //     {
-    //         userId: 1,
-    //         username: 'sainserto',
-    //         password: 'password',
-    //         firstName: 'Arlette',
-    //         lastName: 'Inserto',
-    //         email: 'sai@gmail.com',
-    //         role: {
-    //             roleId: 1,
-    //             role: 'admin'
-    //         }
-    //     },
-    //     {
-    //         userId: 2,
-    //         username: 'bryle',
-    //         password: 'password',
-    //         firstName: 'Bryle',
-    //         lastName: 'Peralta',
-    //         email: 'bryle@gmail.com',
-    //         role: {
-    //             roleId: 2,
-    //             role: 'finance-manager'
-    //         }
-    //     },
-    //     {
-    //         userId: 3,
-    //         username: 'kyeoleo',
-    //         password: 'password',
-    //         firstName: 'Kyeo',
-    //         lastName: 'Leo',
-    //         email: 'kyeo@gmail.com',
-    //         role: {
-    //             roleId: 3,
-    //             role: 'user'
-    //         }
-    //     }
-    // ]
+    let { username, password, firstName, lastName, email, role } = req.body
+    let newUser: User = {
+        userId: req.body.userId,
+        username,
+        password,
+        firstName,
+        lastName,
+        email,
+        role
+    }
+    const id = newUser.userId
+    if (isNaN(id)) {
+        next(new UserIdInputError)
+    }
+    try {
+        let savedUser = await updateUser(id, newUser)
+        res.json(savedUser).sendStatus(201)
+    } catch (e) {
+        console.log(e)
+        next(e)
+    }
+})

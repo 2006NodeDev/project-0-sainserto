@@ -1,10 +1,7 @@
 import { UserDTO } from "../dtos/user-dto";
 import { User } from "../models/User";
-// import { Role } from "../models/Role";
-// import { Role } from "../models/Role";
 
 export function UserDTOtoUserConverter(udto: UserDTO): User {
-
     return {
         userId: udto.user_id,
         username: udto.username,

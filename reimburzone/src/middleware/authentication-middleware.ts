@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 
 export function authenticationMiddleware(req:Request, res:Response, next:NextFunction){
-    //checks if logged in
     if(!req.session.user){
         res.status(401).send('Please Log in')
     }else{

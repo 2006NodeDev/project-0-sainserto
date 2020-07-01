@@ -1,5 +1,9 @@
 export class ReimbursementType{
     typeId: number
     type: string
+
+    constructor(typeId: number, type: string){
+        this.typeId = typeId
+        this.type = type
+    }
 }
-//1 - Lodging, 2 - Travel, 3 - Food, 4 - Other

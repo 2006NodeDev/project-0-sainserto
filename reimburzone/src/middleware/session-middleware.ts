@@ -1,7 +1,7 @@
 import session, { SessionOptions } from 'express-session'
 
 const sessionConfig:SessionOptions = {
-    secret: 'secret', //you should use a hash instead not this
+    secret: 'secret',
     cookie:{
         secure:false
     },
