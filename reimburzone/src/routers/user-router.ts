@@ -86,7 +86,7 @@ userRouter.patch('/', authorizationMiddleware(['admin']), async (req: Request, r
         email,
         role
     }
-    const id = newUser.userId
+    let id = newUser.userId
     if (isNaN(id)) {
         next(new UserIdInputError)
     }

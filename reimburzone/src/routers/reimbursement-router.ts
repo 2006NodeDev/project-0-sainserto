@@ -150,7 +150,7 @@ reimbursementRouter.patch('/', async (req: Request, res: Response, next: NextFun
 
         newReimbursement.status = status || "Pending"
         newReimbursement.dateResolved = dateResolved || (new Date().toDateString())
-        const id = newReimbursement.reimbursementId
+        let id = newReimbursement.reimbursementId
         if (isNaN(id)) {
             next(new ReimbursementIdInputError)
         }
